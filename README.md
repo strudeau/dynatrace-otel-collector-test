@@ -27,10 +27,10 @@ This project demonstrates a simple test setup for the Dynatrace OpenTelemetry Co
 
 ## Configuration
 
-The collector is configured via `collector-config.yaml` with:
+The collector is configured via `config/collector-config.yaml` with:
 
 - **Receivers**: hostmetrics collecting every 10 seconds
-- **Processors**: resource detection, cumulative to delta conversion, batching
+- **Processors**: batching for efficient processing
 - **Exporters**: debug exporter with detailed verbosity
 
 ## Testing
@@ -51,8 +51,15 @@ Once host metrics collection is verified working with the debug exporter, you ca
 2. Add environment variables for `DT_ENDPOINT` and `API_TOKEN`
 3. Configure additional receivers or processors as needed
 
+## Documentation
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - Detailed project architecture and design decisions
+- [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) - Comprehensive troubleshooting guide and issue analysis
+- [`CLAUDE.md`](CLAUDE.md) - Claude Code guidance for working with this repository
+
 ## Troubleshooting
 
 - Ensure Docker has sufficient permissions to access host metrics
 - Check container logs for any permission or configuration errors
 - Verify that the collector container has access to `/proc`, `/sys`, and `/etc` from the host
+- See [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) for detailed analysis of common issues
