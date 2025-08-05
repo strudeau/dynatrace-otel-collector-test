@@ -2,10 +2,10 @@
 services:
   collector:
     image: ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:latest
-    container_name: dynatrace-otel-collector-test
+    container_name: dynatrace-otel-collector
     command: ["--config", "/collector.yaml"]
     volumes:
-      - ./config/telemetry-only-config.yaml:/collector.yaml:ro
+      - ./config/collector-config.yaml:/collector.yaml:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /etc:/host/etc:ro
@@ -13,7 +13,10 @@ services:
       - HOST_PROC=/host/proc
       - HOST_SYS=/host/sys
       - HOST_ETC=/host/etc
-    network_mode: host
-    pid: host
-    privileged: true
+    ports:
+      - "8888:8888"   # Internal telemetry metrics endpoint
+    # Removed privileged settings to enable internal telemetry:
+    # network_mode: host    # Use bridge network instead
+    # pid: host            # Use container PID namespace
+    # privileged: true     # Use minimal privileges
     restart: unless-stopped

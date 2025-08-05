@@ -15,7 +15,9 @@ exporters:
 service:
   telemetry:
     metrics:
-      level: none
+      level: normal  # Enable internal telemetry for collector monitoring
+    logs:
+      level: info   # Enable internal logging
   pipelines:
     metrics:
       receivers: [hostmetrics]

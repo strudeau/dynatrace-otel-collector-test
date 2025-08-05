@@ -117,85 +117,39 @@ service:
 - **Deep System Access**: Some advanced host metrics may be inaccessible without privileged mode
 - **Network Interface Metrics**: Host network metrics may be limited in bridge mode
 
-## Implementation Strategies
+## Single Collector Solution
 
-### Strategy 1: Hybrid Collection (Recommended)
-**Use Case**: Need both internal telemetry and basic host metrics
+### Implementation Approach
+**Use Case**: Collect both internal telemetry and basic host metrics with one collector
 
 ```bash
-# Deploy hybrid configuration
-docker-compose -f docker-compose-hybrid.yml up -d
+# Deploy the collector with both capabilities
+docker-compose up -d
 
-# Access internal telemetry
+# Access internal telemetry via Prometheus endpoint
 curl http://localhost:8888/metrics
 
-# View combined metrics in debug output
-docker-compose -f docker-compose-hybrid.yml logs -f collector
+# View host metrics in debug output
+docker-compose logs -f collector
 ```
 
 **Benefits:**
-- Best of both worlds: internal + host metrics
-- Single collector deployment
-- Simplified monitoring architecture
+- ✅ Single collector deployment
+- ✅ Internal telemetry + host metrics combined
+- ✅ Simplified architecture and management
+- ✅ Minimal resource overhead
+- ✅ Both collector health and system metrics available
+
+**Capabilities:**
+- **Host Metrics**: CPU utilization, memory usage from host system
+- **Internal Telemetry**: Collector performance, queue depths, processing rates
+- **Debug Output**: Real-time metric validation and troubleshooting
+- **Prometheus Endpoint**: Standard metrics format for monitoring integration
 
 **Limitations:**
-- Limited to CPU/memory host metrics
-- No process-level host monitoring
-
-### Strategy 2: Dual Collector Approach
-**Use Case**: Need comprehensive host metrics AND internal telemetry
-
-```yaml
-# Collector 1: Host metrics with privileged access (telemetry disabled)
-collector-host:
-  # ... privileged settings for comprehensive host metrics
-  service:
-    telemetry:
-      metrics:
-        level: none  # Disable internal telemetry
-
-# Collector 2: Internal telemetry only (no privileged access)  
-collector-internal:
-  # ... non-privileged settings for internal telemetry
-  service:
-    telemetry:
-      metrics:
-        level: detailed  # Enable detailed internal telemetry
-```
-
-**Benefits:**
-- Comprehensive host metrics (including processes)
-- Full internal telemetry capabilities
-- Complete observability coverage
-
-**Limitations:**
-- More complex deployment
-- Additional resource overhead
-- Requires coordination between collectors
-
-### Strategy 3: External Process Monitoring
-**Use Case**: Need process metrics alongside internal telemetry
-
-```yaml
-# Use hybrid collector for CPU/memory + internal telemetry
-# Deploy additional process monitoring (e.g., node_exporter sidecar)
-services:
-  collector:
-    # ... hybrid configuration
-  node-exporter:
-    image: prom/node-exporter
-    # ... process monitoring configuration
-```
-
-**Benefits:**
-- Specialized tools for specific metrics
-- Hybrid collector focuses on core functionality
-- Industry-standard process monitoring
-
-**Limitations:**
-- Multiple monitoring tools to manage
-- Different data formats and exporters
-- Increased complexity
+- Limited to CPU/memory host metrics (no process-level monitoring)
+- Some advanced host metrics may be inaccessible without privileged mode
+- Network interface metrics may be limited in bridge mode
 
 ## Key Insights
 
@@ -231,20 +185,22 @@ services:
 
 ## Production Recommendations
 
-### For Comprehensive Monitoring
-1. **Use Dual Collector Strategy** if you need both comprehensive host metrics and internal telemetry
-2. **Separate concerns**: One collector for privileged host access, another for internal observability
-3. **External aggregation**: Use a metrics aggregator (e.g., Prometheus) to combine data sources
+### Single Collector Deployment
+1. **Use the unified configuration** for both host metrics and internal telemetry
+2. **Monitor collector health** via internal telemetry on port 8888
+3. **Accept trade-offs** on comprehensive host metrics for simplified architecture
+4. **Supplement with external tools** if process-level monitoring is required
 
-### For Simplified Deployments
-1. **Use Hybrid Configuration** for basic host metrics + internal telemetry
-2. **Accept limitations** on process-level host monitoring
-3. **Supplement with external tools** for missing metrics
-
-### For Testing and Development
-1. **Start with hybrid approach** to get both capabilities working
+### Configuration Management
+1. **Start with the base configuration** (`config/collector-config.yaml`)
 2. **Validate internal telemetry** provides needed collector health insights
-3. **Incrementally add complexity** based on specific monitoring requirements
+3. **Monitor both host and collector metrics** through single endpoint
+4. **Use Prometheus or similar** to scrape internal metrics endpoint
+
+### Testing and Validation
+1. **Test with debug exporter** to validate metric collection
+2. **Verify internal telemetry endpoint** responds on port 8888
+3. **Confirm host metrics collection** works without privileged access
 
 ## Conclusion
 
@@ -252,10 +208,10 @@ The answer to "Can we collect internal telemetry by adapting the hostmetrics rec
 
 **Yes, but not by adapting hostmetrics - by adapting the Docker configuration.**
 
-The solution involves:
+The single collector solution involves:
 1. **Removing privileged container settings** that interfere with internal telemetry
 2. **Maintaining host filesystem mounts** for basic host metrics collection  
-3. **Accepting trade-offs** between comprehensive host metrics and internal telemetry
-4. **Choosing the right strategy** based on monitoring requirements
+3. **Enabling internal telemetry** in the collector configuration
+4. **Using one unified deployment** for both capabilities
 
-This approach provides a practical path forward for collecting both collector performance metrics and system metrics in containerized environments.
+This approach provides a practical, simplified path forward for collecting both collector performance metrics and system metrics in containerized environments with minimal complexity.
