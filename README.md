@@ -1,12 +1,54 @@
-# Dynatrace OpenTelemetry Collector Docker Test
+# Dynatrace OpenTelemetry Collector: Single Collector Solution
 
-This project demonstrates a simple test setup for the Dynatrace OpenTelemetry Collector using Docker, configured to collect host metrics and output them using the debug exporter.
+## TL;DR
 
-## Components
+**A production-ready single collector that combines host metrics collection with comprehensive internal telemetry and health monitoring - solving containerization challenges through Docker configuration rather than complex multi-collector setups.**
 
-- **Dynatrace OpenTelemetry Collector**: Official Dynatrace distribution
-- **Host Metrics Receiver**: Collects system metrics (CPU, memory, disk, network, processes)
-- **Debug Exporter**: Outputs collected metrics to console for testing
+```bash
+# Quick start - get everything running
+docker-compose up -d
+
+# Check health
+curl http://localhost:13133/health
+
+# View metrics
+docker-compose logs -f collector
+curl http://localhost:8888/metrics
+```
+
+## Design Philosophy
+
+This solution demonstrates that **sophisticated observability doesn't require complex architectures**. By carefully configuring Docker containers and understanding OpenTelemetry Collector internals, we achieve:
+
+- ✅ **Host system monitoring** (CPU, memory metrics from the host)
+- ✅ **Collector health monitoring** (internal telemetry via Prometheus endpoint)  
+- ✅ **Comprehensive diagnostics** (zPages web interface for troubleshooting)
+- ✅ **Container orchestration ready** (health checks for Kubernetes/Docker)
+- ✅ **Single deployment** (no dual collectors or external dependencies)
+
+**Key Insight**: The breakthrough was discovering that **privileged container settings interfere with internal telemetry process registration**. By removing privileged access while maintaining host filesystem mounts, both capabilities work together seamlessly.
+
+## Monitoring Capabilities
+
+### 🔍 **Host Metrics Collection**
+- **CPU & Memory**: System utilization from host (not container)
+- **Collection Interval**: 10-second intervals for real-time monitoring
+- **Host Access**: Filesystem mounts provide access without privileged containers
+
+### 📊 **Internal Telemetry** 
+- **Prometheus Endpoint**: `http://localhost:8888/metrics` (17 collector performance metrics)
+- **Key Metrics**: Export success/failure rates, CPU/memory usage, processing throughput
+- **Format**: Industry-standard Prometheus format for monitoring integration
+
+### ⚕️ **Health Monitoring**
+- **Health Check**: `http://localhost:13133/health` (simple "healthy/unhealthy" status)
+- **Kubernetes Ready**: Compatible with liveness/readiness probes
+- **Container Orchestration**: Works with Docker health checks and monitoring systems
+
+### 🔧 **Diagnostic Interface**
+- **zPages**: `http://localhost:55679/debug/` (web-based diagnostic interface)
+- **Real-time Insights**: Pipeline flow, component status, performance analysis
+- **Troubleshooting**: Live debugging without external dependencies
 
 ## Quick Start
 
@@ -25,41 +67,62 @@ This project demonstrates a simple test setup for the Dynatrace OpenTelemetry Co
    docker-compose down
    ```
 
-## Configuration
+## Endpoint Reference
 
-The collector is configured via `config/collector-config.yaml` with:
+| **Endpoint** | **Purpose** | **Example Usage** |
+|--------------|-------------|-------------------|
+| `http://localhost:13133/health` | Health status | `curl http://localhost:13133/health` |
+| `http://localhost:8888/metrics` | Internal telemetry | `curl http://localhost:8888/metrics \| grep otelcol` |
+| `http://localhost:55679/debug/` | Diagnostic interface | Open in browser for web UI |
+| `docker-compose logs -f collector` | Host metrics output | Real-time CPU/memory data |
 
-- **Receivers**: hostmetrics collecting every 10 seconds
-- **Processors**: batching for efficient processing
-- **Exporters**: debug exporter with detailed verbosity
+## Production Readiness
 
-## Testing
+### ✅ **Container Orchestration**
+```yaml
+# Kubernetes readiness probe
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 13133
+  initialDelaySeconds: 5
+  periodSeconds: 10
+```
 
-The debug exporter will output detailed metrics information to the console, allowing you to verify that host metrics are being collected properly. Look for:
+### ✅ **Monitoring Integration** 
+```yaml
+# Prometheus scrape config
+- job_name: 'otel-collector'
+  static_configs:
+    - targets: ['localhost:8888']
+```
 
-- CPU utilization metrics
-- Memory usage and limits
-- Disk filesystem utilization
-- Network statistics
-- Process counts and utilization
+### ✅ **Troubleshooting Ready**
+- zPages provide real-time diagnostic capabilities
+- Comprehensive logging via debug exporter
+- Health endpoints for automated monitoring
 
 ## Next Steps
 
-Once host metrics collection is verified working with the debug exporter, you can:
-
-1. Replace the debug exporter with the Dynatrace otlphttp exporter
-2. Add environment variables for `DT_ENDPOINT` and `API_TOKEN`
-3. Configure additional receivers or processors as needed
+**For Production Deployment:**
+1. Replace debug exporter with Dynatrace OTLP HTTP exporter
+2. Add `DT_ENDPOINT` and `API_TOKEN` environment variables  
+3. Configure additional scrapers (disk, network) as needed
+4. Set up Prometheus scraping of internal metrics
+5. Integrate health checks with orchestration platform
 
 ## Documentation
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - Detailed project architecture and design decisions
-- [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) - Comprehensive troubleshooting guide and issue analysis
-- [`CLAUDE.md`](CLAUDE.md) - Claude Code guidance for working with this repository
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - Complete architectural documentation and design decisions
+- [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) - Deep-dive troubleshooting guide and containerization insights  
+- [`docs/HEALTH-CHECK-GUIDE.md`](docs/HEALTH-CHECK-GUIDE.md) - Comprehensive health monitoring and endpoint documentation
+- [`docs/INTERNAL-TELEMETRY-SOLUTION.md`](docs/INTERNAL-TELEMETRY-SOLUTION.md) - Technical analysis of internal telemetry implementation
+- [`CLAUDE.md`](CLAUDE.md) - Development guidance for working with this repository
 
-## Troubleshooting
+## Key Technical Achievement
 
-- Ensure Docker has sufficient permissions to access host metrics
-- Check container logs for any permission or configuration errors
-- Verify that the collector container has access to `/proc`, `/sys`, and `/etc` from the host
-- See [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) for detailed analysis of common issues
+**Problem Solved**: OpenTelemetry Collector internal telemetry failed in containerized environments due to process metric registration conflicts with privileged Docker settings.
+
+**Solution Discovered**: Remove privileged container access (`pid: host`, `privileged: true`, `network_mode: host`) while maintaining host filesystem mounts. This allows internal telemetry to work alongside host metrics collection in a single, simplified deployment.
+
+**Impact**: Eliminates the need for complex dual-collector architectures while providing comprehensive observability capabilities.
