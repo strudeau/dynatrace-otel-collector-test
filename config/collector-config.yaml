@@ -12,7 +12,18 @@ exporters:
   debug:
     verbosity: detailed
 
+extensions:
+  health_check:
+    endpoint: "0.0.0.0:13133"
+    path: "/health"
+    response_body:
+      healthy: "Collector is healthy"
+      unhealthy: "Collector is unhealthy"
+  zpages:
+    endpoint: "0.0.0.0:55679"
+
 service:
+  extensions: [health_check, zpages]
   telemetry:
     metrics:
       level: normal  # Enable internal telemetry for collector monitoring
