@@ -1,0 +1,30 @@
+# Hybrid configuration: hostmetrics + internal telemetry
+# Attempts to enable internal telemetry while keeping hostmetrics
+
+receivers:
+  hostmetrics:
+    collection_interval: 10s
+    scrapers:
+      cpu:
+      memory:
+      # Deliberately excluding process-related scrapers
+
+processors:
+  batch:
+
+exporters:
+  debug:
+    verbosity: detailed
+  # Could add prometheus exporter here to scrape internal metrics
+
+service:
+  telemetry:
+    metrics:
+      level: normal  # Use normal level for good telemetry coverage
+    logs:
+      level: info  # Enable internal logging
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [batch]
+      exporters: [debug]

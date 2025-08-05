@@ -5,7 +5,7 @@ services:
     container_name: dynatrace-otel-collector-test
     command: ["--config", "/collector.yaml"]
     volumes:
-      - ./config/collector-config.yaml:/collector.yaml:ro
+      - ./config/telemetry-only-config.yaml:/collector.yaml:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /etc:/host/etc:ro

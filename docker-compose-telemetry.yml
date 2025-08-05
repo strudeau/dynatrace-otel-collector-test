@@ -1,0 +1,18 @@
+# Alternative Docker Compose for testing internal telemetry
+# Removes some privileged access that might interfere with process metrics
+
+services:
+  collector:
+    image: ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:latest
+    container_name: dynatrace-otel-collector-telemetry-test
+    command: ["--config", "/collector.yaml"]
+    volumes:
+      - ./config/telemetry-only-config.yaml:/collector.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Internal metrics (Prometheus)
+    # Remove privileged settings to see if it helps with process metrics
+    # network_mode: bridge  # Use bridge instead of host
+    # privileged: false     # Remove privileged access
+    restart: unless-stopped

@@ -1,0 +1,23 @@
+# Hybrid Docker Compose: hostmetrics + internal telemetry
+# Removes privileged settings that interfere with internal telemetry
+
+services:
+  collector:
+    image: ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:latest
+    container_name: dynatrace-otel-collector-hybrid-test
+    command: ["--config", "/collector.yaml"]
+    volumes:
+      - ./config/hybrid-config.yaml:/collector.yaml:ro
+      # Mount host filesystems for hostmetrics
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc:/host/etc:ro
+    environment:
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+      - HOST_ETC=/host/etc
+    ports:
+      - "8888:8888"   # Internal metrics (Prometheus)
+    # Use bridge network instead of host to avoid process conflicts
+    # Remove privileged and pid: host settings
+    restart: unless-stopped
