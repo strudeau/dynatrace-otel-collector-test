@@ -12,7 +12,7 @@ exporters:
   debug:
     verbosity: detailed
   otlphttp:
-    endpoint: ${env:DT_ENDPOINT}
+    endpoint: "${env:DT_ENDPOINT}"
     headers:
       Authorization: "Api-Token ${env:API_TOKEN}"
 
