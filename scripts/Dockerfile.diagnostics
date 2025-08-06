@@ -1,0 +1,16 @@
+FROM python:3.11-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install required packages for network diagnostics
+RUN apk add --no-cache curl jq
+
+# Copy diagnostics script
+COPY diagnostics.py /app/diagnostics.py
+
+# Make script executable
+RUN chmod +x /app/diagnostics.py
+
+# Set default command
+ENTRYPOINT ["python", "/app/diagnostics.py"]

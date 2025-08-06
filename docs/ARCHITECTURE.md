@@ -99,12 +99,20 @@ receivers:
 ### Processor Configuration
 ```yaml
 processors:
+  resourcedetection:
+    detectors: [env, system, dynatrace]
+    timeout: 5s
+    override: true
+  cumulativetodelta:
+    # Required: Converts cumulative metrics to delta temporality for Dynatrace
   batch:                        # Basic batching for efficiency
 ```
 
 **Design Decisions:**
-- **Single Processor**: Minimal processing to reduce complexity
-- **Default Batching**: Uses OpenTelemetry defaults for batch size and timeout
+- **Resource Detection**: Adds host.name and resource attributes for proper Dynatrace topology mapping
+- **Cumulative to Delta**: REQUIRED - Dynatrace only accepts delta temporality metrics
+- **Batch Processing**: Performance optimization for metric export
+- **Processing Order**: resourcedetection → cumulativetodelta → batch ensures proper attribute and temporal conversion
 
 ### Exporter Configuration
 ```yaml
@@ -154,7 +162,7 @@ service:
   pipelines:
     metrics:
       receivers: [hostmetrics]
-      processors: [batch]
+      processors: [resourcedetection, cumulativetodelta, batch]
       exporters: [debug, otlphttp]
 ```
 

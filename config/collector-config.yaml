@@ -6,6 +6,12 @@ receivers:
       memory:
 
 processors:
+  resourcedetection:
+    detectors: [env, system, dynatrace]
+    timeout: 5s
+    override: true
+  cumulativetodelta:
+    # Required: Converts cumulative metrics to delta temporality for Dynatrace
   batch:
 
 exporters:
@@ -15,6 +21,16 @@ exporters:
     endpoint: "${env:DT_ENDPOINT}"
     headers:
       Authorization: "Api-Token ${env:API_TOKEN}"
+    timeout: 30s
+    retry_on_failure:
+      enabled: true
+      initial_interval: 1s
+      max_interval: 30s
+      max_elapsed_time: 300s
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
 
 extensions:
   health_check:
@@ -30,7 +46,7 @@ service:
   extensions: [health_check, zpages]
   telemetry:
     metrics:
-      level: normal  # Enable internal telemetry for collector monitoring
+      level: detailed  # Enhanced telemetry for comprehensive monitoring
       readers:
         - pull:
             exporter:
@@ -42,5 +58,5 @@ service:
   pipelines:
     metrics:
       receivers: [hostmetrics]
-      processors: [batch]
+      processors: [resourcedetection, cumulativetodelta, batch]
       exporters: [debug, otlphttp]

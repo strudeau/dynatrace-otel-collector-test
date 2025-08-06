@@ -119,6 +119,39 @@ Since `.env` files don't work reliably with docker-compose on Windows, set envir
 
 The collector will now send metrics to both debug output and your Dynatrace environment.
 
+## Diagnostics and Monitoring
+
+### **🔍 Cross-Platform Diagnostics**
+We provide comprehensive diagnostic tools that work on **Windows, Linux, and macOS**:
+
+#### **Quick Diagnostics:**
+```bash
+# Windows (PowerShell or Command Prompt)
+cd scripts
+run-diagnostics.bat
+
+# Linux/macOS  
+cd scripts
+./run-diagnostics.sh
+
+# Direct Python (any platform)
+cd scripts
+python diagnostics.py
+```
+
+#### **Docker Diagnostics (no local Python needed):**
+```bash
+cd scripts
+docker-compose -f docker-compose.diagnostics.yml up --build
+```
+
+### **📊 Monitoring Capabilities**
+- ✅ **Health Status**: Collector overall health and endpoint accessibility
+- 📤 **Export Statistics**: Metrics sent to Dynatrace vs. failed attempts  
+- 📈 **Success Rate**: Real-time export success percentage
+- 📋 **Queue Status**: Export queue utilization and capacity
+- ⚡ **Performance**: End-to-end pipeline health monitoring
+
 ## Endpoint Reference
 
 | **Endpoint** | **Purpose** | **Example Usage** |
@@ -169,6 +202,7 @@ readinessProbe:
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - Complete architectural documentation and design decisions
 - [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) - Deep-dive troubleshooting guide and internal telemetry solution
 - [`docs/MONITORING.md`](docs/MONITORING.md) - Comprehensive health monitoring and endpoint documentation
+- [`scripts/README.md`](scripts/README.md) - **Cross-platform diagnostic tools and monitoring scripts**
 - [`CLAUDE.md`](CLAUDE.md) - Development guidance for working with this repository
 
 ## Key Technical Achievement
