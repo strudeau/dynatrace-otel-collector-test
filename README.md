@@ -78,7 +78,7 @@ This solution demonstrates that **sophisticated observability doesn't require co
    cp .env.example .env
    
    # Edit .env with your actual Dynatrace values
-   # DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp/v1/metrics
+   # DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp
    # API_TOKEN=your-api-token-here
    ```
 
@@ -93,7 +93,7 @@ Since `.env` files don't work reliably with docker-compose on Windows, set envir
 1. **PowerShell:**
    ```powershell
    # Set environment variables
-   $env:DT_ENDPOINT = "https://your-environment-id.live.dynatrace.com/api/v2/otlp/v1/metrics"
+   $env:DT_ENDPOINT = "https://your-environment-id.live.dynatrace.com/api/v2/otlp"
    $env:API_TOKEN = "your-api-token-here"
    
    # Start the collector
@@ -103,7 +103,7 @@ Since `.env` files don't work reliably with docker-compose on Windows, set envir
 2. **Command Prompt:**
    ```cmd
    # Set environment variables
-   set DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp/v1/metrics
+   set DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp
    set API_TOKEN=your-api-token-here
    
    # Start the collector
@@ -113,7 +113,7 @@ Since `.env` files don't work reliably with docker-compose on Windows, set envir
 3. **Alternative - Modify docker-compose.yml directly:**
    ```yaml
    environment:
-     - DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp/v1/metrics
+     - DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp
      - API_TOKEN=your-api-token-here
    ```
 
