@@ -113,10 +113,10 @@ readinessProbe:
 
 ## Documentation
 
+- [`docs/OVERVIEW.md`](docs/OVERVIEW.md) - Documentation navigation guide and structure
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - Complete architectural documentation and design decisions
-- [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) - Deep-dive troubleshooting guide and containerization insights  
-- [`docs/HEALTH-CHECK-GUIDE.md`](docs/HEALTH-CHECK-GUIDE.md) - Comprehensive health monitoring and endpoint documentation
-- [`docs/INTERNAL-TELEMETRY-SOLUTION.md`](docs/INTERNAL-TELEMETRY-SOLUTION.md) - Technical analysis of internal telemetry implementation
+- [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) - Deep-dive troubleshooting guide and internal telemetry solution
+- [`docs/MONITORING.md`](docs/MONITORING.md) - Comprehensive health monitoring and endpoint documentation
 - [`CLAUDE.md`](CLAUDE.md) - Development guidance for working with this repository
 
 ## Key Technical Achievement

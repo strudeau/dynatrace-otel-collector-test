@@ -246,3 +246,72 @@ The troubleshooting process revealed that successful containerization of OpenTel
 The final working configuration demonstrates that a simplified, container-aware approach provides reliable metrics collection while avoiding the pitfalls of trying to replicate bare-metal configurations in containerized environments.
 
 This experience highlights the importance of **progressive configuration development** and **environment-specific testing** when deploying observability tools in containerized environments.
+
+---
+
+## Complete Internal Telemetry Solution
+
+### Can Internal Telemetry Be Enabled with Host Metrics?
+
+**Answer: Yes, but requires adapting Docker configuration rather than the hostmetrics receiver.**
+
+The breakthrough discovery was that **privileged container settings interfere with internal telemetry process metrics registration**. The solution involves:
+
+### Working Configuration
+```yaml
+# docker-compose.yml
+services:
+  collector:
+    volumes:
+      - ./config/collector-config.yaml:/collector.yaml:ro
+      - /proc:/host/proc:ro     # Still mount for hostmetrics
+      - /sys:/host/sys:ro       # Still mount for hostmetrics  
+      - /etc:/host/etc:ro       # Still mount for hostmetrics
+    environment:
+      - HOST_PROC=/host/proc    # Tell collector where to find host data
+      - HOST_SYS=/host/sys
+      - HOST_ETC=/host/etc
+    ports:
+      - "8888:8888"             # Expose internal metrics endpoint
+      - "13133:13133"           # Health check endpoint  
+      - "55679:55679"           # zPages diagnostic interface
+    # REMOVE these problematic settings:
+    # network_mode: host        # Use bridge network instead
+    # pid: host                 # Use container PID namespace
+    # privileged: true          # Use minimal privileges
+```
+
+```yaml
+# config/collector-config.yaml
+service:
+  extensions: [health_check, zpages]
+  telemetry:
+    metrics:
+      level: normal    # Enable internal telemetry
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: '0.0.0.0'
+                port: 8888
+    logs:
+      level: info     # Enable internal logging
+```
+
+### Verified Results
+✅ **Internal Telemetry**: 17 collector performance metrics exposed  
+✅ **Host Metrics**: CPU and memory collection from host system  
+✅ **Health Endpoints**: Container orchestration ready  
+✅ **Diagnostic Interface**: zPages for real-time troubleshooting  
+✅ **Single Deployment**: No dual collectors required  
+
+### Key Technical Insight
+
+**Root Cause**: All internal telemetry levels attempt to register process metrics for the collector's own process. This fails when:
+- Container has privileged access (`pid: host`, `privileged: true`)
+- PID namespace boundaries are unclear
+- Network mode conflicts with internal telemetry localhost discovery
+
+**Solution**: Remove privileged container settings while maintaining host filesystem mounts. This allows internal telemetry process registration to work correctly while still collecting host metrics.
+
+This approach provides both collector health monitoring and system metrics in a single, production-ready deployment.

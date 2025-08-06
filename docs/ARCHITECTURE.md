@@ -9,10 +9,10 @@ dynatrace-otel-collector-docker/
 ├── config/                     # Configuration files
 │   └── collector-config.yaml   # Single collector configuration
 ├── docs/                       # Comprehensive documentation
+│   ├── OVERVIEW.md             # Documentation navigation guide
 │   ├── ARCHITECTURE.md         # This file - complete architecture
-│   ├── TROUBLESHOOTING.md      # Containerization troubleshooting guide
-│   ├── HEALTH-CHECK-GUIDE.md   # Health monitoring and endpoints
-│   └── INTERNAL-TELEMETRY-SOLUTION.md # Technical telemetry analysis
+│   ├── TROUBLESHOOTING.md      # Containerization troubleshooting and telemetry
+│   └── MONITORING.md           # Health monitoring and endpoints
 ├── docker-compose.yml          # Non-privileged container setup
 ├── README.md                   # Solution overview and quick start
 ├── CLAUDE.md                   # Development guidance
