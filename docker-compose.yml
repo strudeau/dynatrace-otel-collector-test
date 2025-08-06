@@ -13,6 +13,8 @@ services:
       - HOST_PROC=/host/proc
       - HOST_SYS=/host/sys
       - HOST_ETC=/host/etc
+      - DT_ENDPOINT=${DT_ENDPOINT}
+      - API_TOKEN=${API_TOKEN}
     ports:
       - "8888:8888"   # Internal telemetry metrics endpoint
       - "13133:13133" # Health check endpoint

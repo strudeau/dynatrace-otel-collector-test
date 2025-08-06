@@ -52,6 +52,8 @@ This solution demonstrates that **sophisticated observability doesn't require co
 
 ## Quick Start
 
+### Development Setup (Debug Output Only)
+
 1. **Start the collector:**
    ```bash
    docker-compose up --build
@@ -66,6 +68,25 @@ This solution demonstrates that **sophisticated observability doesn't require co
    ```bash
    docker-compose down
    ```
+
+### Production Setup (With Dynatrace Integration)
+
+1. **Configure Dynatrace credentials:**
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env with your actual Dynatrace values
+   # DT_ENDPOINT=https://your-environment.live.dynatrace.com/api/v2/otlp/v1/metrics
+   # API_TOKEN=your-api-token-here
+   ```
+
+2. **Start the collector with Dynatrace integration:**
+   ```bash
+   docker-compose up --build
+   ```
+
+   The collector will now send metrics to both debug output and your Dynatrace environment.
 
 ## Endpoint Reference
 
@@ -105,11 +126,11 @@ readinessProbe:
 ## Next Steps
 
 **For Production Deployment:**
-1. Replace debug exporter with Dynatrace OTLP HTTP exporter
-2. Add `DT_ENDPOINT` and `API_TOKEN` environment variables  
-3. Configure additional scrapers (disk, network) as needed
-4. Set up Prometheus scraping of internal metrics
-5. Integrate health checks with orchestration platform
+1. ✅ **Configure Dynatrace Integration**: Set up `.env` file with your `DT_ENDPOINT` and `API_TOKEN`
+2. Configure additional scrapers (disk, network) as needed
+3. Set up Prometheus scraping of internal metrics
+4. Integrate health checks with orchestration platform
+5. Remove debug exporter if console output is not needed
 
 ## Documentation
 

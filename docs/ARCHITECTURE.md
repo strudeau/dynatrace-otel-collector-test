@@ -111,11 +111,17 @@ processors:
 exporters:
   debug:
     verbosity: detailed         # Maximum detail for testing
+  otlphttp:
+    endpoint: ${env:DT_ENDPOINT}
+    headers:
+      Authorization: "Api-Token ${env:API_TOKEN}"
 ```
 
 **Design Decisions:**
-- **Debug Exporter**: Testing and validation focus
-- **Detailed Verbosity**: Full metric visibility for troubleshooting
+- **Debug Exporter**: Testing and validation with console output
+- **OTLP HTTP Exporter**: Production-ready Dynatrace integration
+- **Environment Variables**: Secure credential management via `.env` file
+- **Dual Export**: Both debug output and Dynatrace ingestion
 
 ### Extensions Configuration
 ```yaml
@@ -149,7 +155,7 @@ service:
     metrics:
       receivers: [hostmetrics]
       processors: [batch]
-      exporters: [debug]
+      exporters: [debug, otlphttp]
 ```
 
 **Design Decisions:**
@@ -180,11 +186,15 @@ environment:
   - HOST_PROC=/host/proc        # Process filesystem path
   - HOST_SYS=/host/sys          # System filesystem path
   - HOST_ETC=/host/etc          # Host configuration path
+  - DT_ENDPOINT=${DT_ENDPOINT}  # Dynatrace OTLP endpoint
+  - API_TOKEN=${API_TOKEN}      # Dynatrace API token
 ```
 
 **Purpose:**
-- Tells the collector where to find host information within container
-- Required for proper host metrics collection
+- **Host Variables**: Tell the collector where to find host information within container
+- **Dynatrace Variables**: Provide secure credential access via environment variables
+- **Configuration Security**: Credentials stored in `.env` file, not hardcoded
+- **Production Ready**: Standard environment variable pattern for secrets management
 
 ### Container Security (Non-Privileged)
 ```yaml
@@ -213,7 +223,7 @@ ports:
 - Debug output only (not persistent storage)
 
 ### Future Scaling Options
-1. **Multiple Exporters**: Add Dynatrace OTLP exporter alongside debug
+1. ✅ **Multiple Exporters**: Dynatrace OTLP exporter added alongside debug
 2. **Additional Scrapers**: Expand to disk, network, and process metrics
 3. **Multiple Instances**: Deploy multiple collectors for different metric sets
 4. **Kubernetes DaemonSet**: Scale across cluster nodes
@@ -274,7 +284,7 @@ ports:
 4. **Diagnostic Tools**: zPages web interface for operational troubleshooting
 
 ### Future Integration Options
-1. **Dynatrace Platform**: Replace debug exporter with OTLP HTTP exporter
+1. ✅ **Dynatrace Platform**: OTLP HTTP exporter integrated alongside debug
 2. **Alerting Systems**: Prometheus-based alerting on collector health metrics
 3. **Dashboard Integration**: Grafana dashboards for collector performance
 4. **Log Aggregation**: Forward internal logs to centralized logging systems
