@@ -71,22 +71,53 @@ This solution demonstrates that **sophisticated observability doesn't require co
 
 ### Production Setup (With Dynatrace Integration)
 
+#### **Linux/macOS Setup:**
 1. **Configure Dynatrace credentials:**
    ```bash
    # Copy the example environment file
    cp .env.example .env
    
    # Edit .env with your actual Dynatrace values
-   # DT_ENDPOINT=https://your-environment.live.dynatrace.com/api/v2/otlp/v1/metrics
+   # DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp/v1/metrics
    # API_TOKEN=your-api-token-here
    ```
 
-2. **Start the collector with Dynatrace integration:**
+2. **Start the collector:**
    ```bash
    docker-compose up --build
    ```
 
-   The collector will now send metrics to both debug output and your Dynatrace environment.
+#### **Windows Setup:**
+Since `.env` files don't work reliably with docker-compose on Windows, set environment variables directly:
+
+1. **PowerShell:**
+   ```powershell
+   # Set environment variables
+   $env:DT_ENDPOINT = "https://your-environment-id.live.dynatrace.com/api/v2/otlp/v1/metrics"
+   $env:API_TOKEN = "your-api-token-here"
+   
+   # Start the collector
+   docker-compose up --build
+   ```
+
+2. **Command Prompt:**
+   ```cmd
+   # Set environment variables
+   set DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp/v1/metrics
+   set API_TOKEN=your-api-token-here
+   
+   # Start the collector
+   docker-compose up --build
+   ```
+
+3. **Alternative - Modify docker-compose.yml directly:**
+   ```yaml
+   environment:
+     - DT_ENDPOINT=https://your-environment-id.live.dynatrace.com/api/v2/otlp/v1/metrics
+     - API_TOKEN=your-api-token-here
+   ```
+
+The collector will now send metrics to both debug output and your Dynatrace environment.
 
 ## Endpoint Reference
 
