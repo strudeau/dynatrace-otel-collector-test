@@ -61,10 +61,12 @@ class CollectorDiagnostics:
     def parse_metric_value(self, metrics_text: str, metric_name: str, labels: str = "") -> Optional[float]:
         """Extract metric value from Prometheus format text"""
         lines = metrics_text.split('\n')
-        search_pattern = f"{metric_name}{{{labels}}}" if labels else f"{metric_name}{{"
         
         for line in lines:
-            if line.startswith(search_pattern) or (not labels and line.startswith(f"{metric_name} ")):
+            if line.startswith(metric_name):
+                # Check if this line contains the required labels (if any)
+                if labels and labels not in line:
+                    continue
                 try:
                     # Extract value (last part after space)
                     value_str = line.split()[-1]
@@ -85,27 +87,32 @@ class CollectorDiagnostics:
             'queue_utilization': 0.0
         }
 
-        # Extract OTLP HTTP exporter specific metrics
-        analysis['otlphttp_sent_metrics'] = self.parse_metric_value(
-            metrics_text, 'otelcol_exporter_sent_metric_points_total', 'exporter="otlphttp"'
-        ) or 0
+        # Extract OTLP HTTP exporter specific metrics (try both metric name formats)
+        analysis['otlphttp_sent_metrics'] = (
+            self.parse_metric_value(metrics_text, 'otelcol_exporter_sent_metric_points__datapoints__total', 'exporter="otlphttp"') or
+            self.parse_metric_value(metrics_text, 'otelcol_exporter_sent_metric_points_total', 'exporter="otlphttp"') or 0
+        )
 
-        analysis['otlphttp_failed_metrics'] = self.parse_metric_value(
-            metrics_text, 'otelcol_exporter_send_failed_metric_points_total', 'exporter="otlphttp"'
-        ) or 0
+        analysis['otlphttp_failed_metrics'] = (
+            self.parse_metric_value(metrics_text, 'otelcol_exporter_send_failed_metric_points__datapoints__total', 'exporter="otlphttp"') or
+            self.parse_metric_value(metrics_text, 'otelcol_exporter_send_failed_metric_points_total', 'exporter="otlphttp"') or 0
+        )
 
-        analysis['otlphttp_queue_size'] = self.parse_metric_value(
-            metrics_text, 'otelcol_exporter_queue_size', 'exporter="otlphttp"'
-        ) or 0
+        analysis['otlphttp_queue_size'] = (
+            self.parse_metric_value(metrics_text, 'otelcol_exporter_queue_size__batches_', 'exporter="otlphttp"') or
+            self.parse_metric_value(metrics_text, 'otelcol_exporter_queue_size', 'exporter="otlphttp"') or 0
+        )
 
-        analysis['otlphttp_queue_capacity'] = self.parse_metric_value(
-            metrics_text, 'otelcol_exporter_queue_capacity', 'exporter="otlphttp"'
-        ) or 0
+        analysis['otlphttp_queue_capacity'] = (
+            self.parse_metric_value(metrics_text, 'otelcol_exporter_queue_capacity__batches_', 'exporter="otlphttp"') or
+            self.parse_metric_value(metrics_text, 'otelcol_exporter_queue_capacity', 'exporter="otlphttp"') or 0
+        )
 
-        # Total metrics received by collector
-        analysis['total_received_metrics'] = self.parse_metric_value(
-            metrics_text, 'otelcol_receiver_accepted_metric_points_total'
-        ) or 0
+        # Total metrics received by collector (try both formats)
+        analysis['total_received_metrics'] = (
+            self.parse_metric_value(metrics_text, 'otelcol_receiver_accepted_metric_points__datapoints__total') or
+            self.parse_metric_value(metrics_text, 'otelcol_receiver_accepted_metric_points_total') or 0
+        )
 
         # Calculate success rate
         total_attempts = analysis['otlphttp_sent_metrics'] + analysis['otlphttp_failed_metrics']
